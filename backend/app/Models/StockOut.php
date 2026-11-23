@@ -15,21 +15,21 @@ class StockOut extends Model
 
     public function product()
     {
-        return $this->hasMany(Product::class);
+        return $this->belongsTo(Product::class);
     }
 
     public function customer()
     {
-        return $this->hasMany(Customer::class);
+        return $this->belongsTo(Customer::class);
     }
 
     public function order()
     {
-        return $this->hasMany(Order::class);
+        return $this->belongsTo(Order::class);
     }
 
     public function inventory()
     {
-        return $this->hasMany(Inventory::class);
+        return $this->belongsTo(Inventory::class);
     }
 }

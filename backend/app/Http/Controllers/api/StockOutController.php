@@ -4,15 +4,13 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StockOutRequest;
-use App\Models\StockOpname;
 use App\Models\StockOut;
-use Illuminate\Http\Request;
 
 class StockOutController extends Controller
 {
-    function __construct()
+    public function __construct()
     {
-        $this->middleware('permission:stockout-list|stockout-create|stockout-edit|stockout-delete', ['only' => 'index', 'store']);
+        $this->middleware('permission:stockout-list|stockout-create|stockout-edit|stockout-delete', ['only' => ['index', 'show']]);
         $this->middleware('permission:stockout-create', ['only' => ['store']]);
         $this->middleware('permission:stockout-edit', ['only' => ['update']]);
         $this->middleware('permission:stockout-delete', ['only' => ['destroy']]);

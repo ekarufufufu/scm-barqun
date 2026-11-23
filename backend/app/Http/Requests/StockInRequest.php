@@ -24,11 +24,11 @@ class StockInRequest extends FormRequest
     public function rules()
     {
         return [
-            'supplier_id' => 'required|exists:suppliers,id',
-            'product_id' => 'required|exists:products,id',
-            'inventory_id' => 'required|exists:inventories,id',
-            'tanggal_masuk' => 'required',
-            'jumlah_masuk' => 'required'
+            'supplier_id' => ['required', 'uuid', 'exists:suppliers,id'],
+            'product_id' => ['required', 'uuid', 'exists:products,id'],
+            'inventory_id' => ['required', 'uuid', 'exists:inventories,id'],
+            'tanggal_masuk' => ['required', 'date'],
+            'jumlah_masuk' => ['required', 'integer', 'min:1'],
         ];
     }
 }

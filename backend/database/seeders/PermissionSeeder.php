@@ -8,7 +8,7 @@ use Spatie\Permission\Models\Permission;
 class PermissionSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Seed application permissions.
      *
      * @return void
      */
@@ -67,7 +67,7 @@ class PermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
     }
 }

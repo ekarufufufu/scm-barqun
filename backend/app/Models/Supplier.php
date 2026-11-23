@@ -13,8 +13,8 @@ class Supplier extends Model
 
     protected $guarded = ['id'];
 
-    function stockIn()
+    public function stockIns()
     {
-        return $this->belongsTo(StockIn::class);
+        return $this->hasMany(StockIn::class);
     }
 }

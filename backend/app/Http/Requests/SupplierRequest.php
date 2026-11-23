@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SupplierRequest extends FormRequest
 {
@@ -23,11 +24,17 @@ class SupplierRequest extends FormRequest
      */
     public function rules()
     {
+        $emailRule = Rule::unique('suppliers', 'email');
+
+        if ($this->route('supplier')) {
+            $emailRule->ignore($this->route('supplier'));
+        }
+
         return [
-            'nama_supplier' => 'required',
-            'email' => 'required|email:dns|unique:suppliers',
-            'nomor_telepon' => 'required',
-            'alamat' => 'required',
+            'nama_supplier' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', $emailRule],
+            'nomor_telepon' => ['required', 'string', 'max:30'],
+            'alamat' => ['required', 'string', 'max:255'],
         ];
     }
 }

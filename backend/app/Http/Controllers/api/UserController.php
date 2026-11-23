@@ -5,108 +5,152 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    function __construct()
+    public function __construct()
     {
-        $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => 'index', 'store']);
+        $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => ['index', 'show']]);
         $this->middleware('permission:user-create', ['only' => ['store']]);
         $this->middleware('permission:user-edit', ['only' => ['update']]);
         $this->middleware('permission:user-delete', ['only' => ['destroy']]);
     }
 
+    /**
+     * Display a listing of users.
+     */
     public function index()
     {
-        $data = User::all();
+        $users = User::with('roles')->get()->map(function (User $user) {
+            return array_merge($user->toArray(), [
+                'roles' => $user->roles->pluck('name'),
+            ]);
+        });
 
         return response()->json([
             'message' => 'Data Retrieved',
-            'data' => $data
-        ], 200);
+            'data' => $users,
+        ]);
     }
 
+    /**
+     * Store a newly created user.
+     */
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required',
-            'roles' => 'required'
+        $this->normalizeRolesInput($request);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
+            'roles' => ['required', 'array', 'min:1'],
+            'roles.*' => ['string', Rule::exists('roles', 'name')],
         ]);
 
-        $input = $request->all();
-        $input['password'] = Hash::make($input['password']);
+        $user = DB::transaction(function () use ($validated) {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
 
-        $user = User::create($input);
-        $user->assignRole($request->input('roles'));
+            $user->syncRoles($validated['roles']);
+
+            return $user;
+        });
 
         return response()->json([
             'message' => 'Data Created',
-            'data' => $user
+            'data' => $user,
         ], 201);
     }
 
+    /**
+     * Display the specified user with role and permissions.
+     */
     public function show(User $user)
     {
-        // $user = User::find($id);
-        // $role = Role::find($id);
-        // $rolePermissions = Permission::join("role_has_permissions", "role_has_permissions.permission_id", "=", "permissions.id")
-        //     ->where("role_has_permissions.role_id", $id)
-        //     ->get();
+        $role = $user->roles->first();
 
         return response()->json([
             'message' => 'Data Retrieved',
             'data' => array_merge(
                 $user->toArray(),
                 [
-                    'role' => $user->roles->first()->name,
-                    'permissions' => $user->roles->first()->permissions->pluck('name')
+                    'role' => $role ? $role->name : null,
+                    'permissions' => $role ? $role->permissions->pluck('name') : [],
                 ]
             ),
-        ], 200);
+        ]);
     }
 
+    /**
+     * Update the specified user.
+     */
     public function update(Request $request, User $user)
     {
-        $this->validate($request, [
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,',
-            'password' => 'required',
-            'roles' => 'required'
+        $this->normalizeRolesInput($request);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'password' => ['nullable', 'string', 'min:8'],
+            'roles' => ['required', 'array', 'min:1'],
+            'roles.*' => ['string', Rule::exists('roles', 'name')],
         ]);
 
-        $input = $request->all();
-        if (!empty($input['passowrd'])) {
-            $input['password'] = Hash::make($input['password']);
-        } else {
-            $input = Arr::except($input, array('password'));
-        }
+        DB::transaction(function () use ($validated, $user) {
+            $user->name = $validated['name'];
+            $user->email = $validated['email'];
 
-        // $user = User::find($id);
-        $user->update($input);
-        DB::table('model_has_roles')->where('model_id', $user->id)->delete();
+            if (!empty($validated['password'])) {
+                $user->password = Hash::make($validated['password']);
+            }
 
-        $user->assignRole($request->input('roles'));
+            $user->save();
+            $user->syncRoles($validated['roles']);
+        });
 
         return response()->json([
             'message' => 'Data Updated',
-            'data' => $user
-        ], 200);
+            'data' => $user,
+        ]);
     }
 
-    public function destroy(User $user)
+    /**
+     * Remove the specified user.
+     */
+    public function destroy(Request $request, User $user)
     {
-        // $user = User::find($id);
+        if ($request->user()->id === $user->id) {
+            return response()->json([
+                'message' => 'You cannot delete your own account.',
+            ], 422);
+        }
+
         $user->delete();
 
         return response()->json([
             'message' => 'Data Deleted',
-        ], 200);
+        ]);
+    }
+
+    /**
+     * Accept both a role name and an array of role names.
+     */
+    private function normalizeRolesInput(Request $request)
+    {
+        if ($request->filled('roles') && is_string($request->input('roles'))) {
+            $request->merge(['roles' => [$request->input('roles')]]);
+        }
     }
 }

@@ -68,7 +68,7 @@ class InventorySeeder extends Seeder
         ];
 
         foreach ($inventories as $inventory) {
-            Inventory::create($inventory);
+            Inventory::firstOrCreate(['nama_gudang' => $inventory['nama_gudang']], $inventory);
         }
     }
 }

@@ -191,7 +191,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/services/api";
 import Navbar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
 export default {
@@ -208,7 +208,6 @@ export default {
       snackbar3: false,
       menu: false,
       formTitle: "",
-      editedItem: {},
       icons: [{ icon: "mdi-delete", text: "delete" }, { icon: "mdi-pencil" }],
       headers: [
         { text: "Order", value: "order_id" },
@@ -223,16 +222,18 @@ export default {
       editedIndex: -1,
       editedItem: {
         order_id: "",
-        supplier_id: "",
+        customer_id: "",
         product_id: "",
         inventory_id: "",
+        jumlah_keluar: "",
         tanggal_keluar: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
       },
       defaultItem: {
         order_id: "",
-        supplier_id: "",
+        customer_id: "",
         product_id: "",
         inventory_id: "",
+        jumlah_keluar: "",
         tanggal_keluar: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
       },
     };
@@ -248,10 +249,15 @@ export default {
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
-    deleteItemConfirm() {
-      const index = this.items.indexOf(this.editedItem);
-      this.items.splice(index, 1);
-      this.closeDelete();
+    async deleteItemConfirm() {
+      try {
+        await api.delete(`/stockout/${this.editedItem.id}`);
+        this.snackbar3 = true;
+        await this.fetchData();
+        this.closeDelete();
+      } catch (error) {
+        console.error("Error deleting item:", error);
+      }
     },
 
     close() {
@@ -277,12 +283,7 @@ export default {
     //get data
     async fetchData() {
       try {
-        const headers = {
-          Authorization: `Bearer 29|LLsaDlynLAwnMMuURjsi7R59bCxdIIi3tq6no7va`,
-        };
-        const response = await axios.get("http://127.0.0.1:8081/api/stockout", {
-          headers,
-        });
+        const response = await api.get("/stockout");
         this.items = response.data.data;
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -294,44 +295,37 @@ export default {
     //post n put data
     async save() {
       try {
-        const headers = {
-          Authorization: `Bearer 29|LLsaDlynLAwnMMuURjsi7R59bCxdIIi3tq6no7va`,
-          "Content-Type": "application/json",
-        };
 
         if (this.formTitle === "Add Stock Out") {
           console.log("Sending POST request...");
           console.log(this.editedItem);
 
-          const response = await axios.post(
-            "http://127.0.0.1:8081/api/stockout",
-            this.editedItem,
-            { headers }
+          await api.post(
+            "/stockout",
+            this.editedItem
           );
-          axios
-            .get("http://127.0.0.1:8081/api/stockout", { headers })
+          api
+            .get("/stockout")
             .then((response) => {
               this.items = response.data.data;
-              this.snackbar1 = false;
+              this.snackbar1 = true;
               this.dialog = false;
             })
             .catch((error) => {
               console.log(error.response);
             });
 
-          this.editedItem.id = response.data.id;
         } else {
           console.log("Sending PUT request...");
-          await axios.put(
-            `http://127.0.0.1:8081/api/stockout/${this.editedItem.id}`,
-            this.editedItem,
-            { headers }
+          await api.put(
+            `/stockout/${this.editedItem.id}`,
+            this.editedItem
           );
-          axios
-            .get("http://127.0.0.1:8081/api/stockout", { headers })
+          api
+            .get("/stockout")
             .then((response) => {
               this.items = response.data.data;
-              this.snackbar2 = false;
+              this.snackbar2 = true;
               this.dialog = false;
             })
             .catch((error) => {
@@ -344,28 +338,10 @@ export default {
         console.error("Error saving data:", error.response);
       }
     },
-
-    //delete data
-    async deleteItem(item) {
-      try {
-        const headers = {
-          Authorization: "Bearer 29|LLsaDlynLAwnMMuURjsi7R59bCxdIIi3tq6no7va",
-        };
-        await axios.delete(`http://127.0.0.1:8081/api/stockout/${item.id}`, {
-          headers,
-        });
-        this.snackbar3 = true;
-        await this.fetchData();
-
-        this.closeDelete();
-      } catch (error) {
-        console.error("Error deleting item:", error);
-      }
-    },
   },
   mounted() {
-    this.fetchData();
     this.isLoading = true;
+    this.fetchData();
   },
 };
 </script>

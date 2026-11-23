@@ -24,12 +24,12 @@ class StockOutRequest extends FormRequest
     public function rules()
     {
         return [
-            'product_id' => 'required|exists:products,id',
-            'customer_id' => 'required|exists:customers,id',
-            'order_id' => 'required|exists:orders,id',
-            'inventory_id' => 'required|exists:inventories,id',
-            'tanggal_keluar' => 'required',
-            'jumlah_keluar' => 'required'
+            'product_id' => ['required', 'uuid', 'exists:products,id'],
+            'customer_id' => ['required', 'uuid', 'exists:customers,id'],
+            'order_id' => ['required', 'uuid', 'exists:orders,id'],
+            'inventory_id' => ['required', 'uuid', 'exists:inventories,id'],
+            'tanggal_keluar' => ['required', 'date'],
+            'jumlah_keluar' => ['required', 'integer', 'min:1'],
         ];
     }
 }

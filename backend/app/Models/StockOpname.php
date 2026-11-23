@@ -15,11 +15,11 @@ class StockOpname extends Model
 
     public function product()
     {
-        return $this->hasMany(Product::class);
+        return $this->belongsTo(Product::class);
     }
 
     public function inventory()
     {
-        return $this->hasMany(Inventory::class);
+        return $this->belongsTo(Inventory::class);
     }
 }

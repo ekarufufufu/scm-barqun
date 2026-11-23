@@ -24,10 +24,10 @@ class StockOpnameRequest extends FormRequest
     public function rules()
     {
         return [
-            'product_id' => 'required|exists:products,id',
-            'inventory_id' => 'required|exists:inventories,id',
-            'tanggal_opname' => 'required',
-            'hasil_opname' => 'required'
+            'product_id' => ['required', 'uuid', 'exists:products,id'],
+            'inventory_id' => ['required', 'uuid', 'exists:inventories,id'],
+            'tanggal_opname' => ['required', 'date'],
+            'hasil_opname' => ['required', 'string', 'max:255'],
         ];
     }
 }

@@ -24,10 +24,11 @@ class OrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'product_id' => 'required|exists:products,id',
-            'customer_id' => 'required|exists:customers,id',
-            'tanggal_pemesanan' => 'required',
-            'status_pemesanan' => 'required'
+            'product_id' => ['required', 'uuid', 'exists:products,id'],
+            'customer_id' => ['required', 'uuid', 'exists:customers,id'],
+            'tanggal_pemesanan' => ['required', 'date'],
+            'jumlah_barang' => ['required', 'integer', 'min:1'],
+            'status_pemesanan' => ['required', 'string', 'max:50'],
         ];
     }
 }

@@ -15,16 +15,16 @@ class StockIn extends Model
 
     public function product()
     {
-        return $this->hasMany(Product::class);
+        return $this->belongsTo(Product::class);
     }
 
     public function supplier()
     {
-        return $this->hasMany(Supplier::class);
+        return $this->belongsTo(Supplier::class);
     }
 
     public function inventory()
     {
-        return $this->hasMany(Inventory::class);
+        return $this->belongsTo(Inventory::class);
     }
 }

@@ -11,22 +11,28 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    /**
+     * Register a new user account.
+     */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8'
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8'],
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors());
+            return response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password)
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => Hash::make($request->input('password')),
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -38,32 +44,42 @@ class AuthController extends Controller
         ], 201);
     }
 
+    /**
+     * Authenticate a user and issue a Sanctum token.
+     */
     public function login(Request $request)
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        $credentials = $request->validate([
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string'],
+        ]);
+
+        if (!Auth::attempt($credentials)) {
             return response()->json([
-                'message' => 'Unauthorized'
+                'message' => 'Unauthorized',
             ], 401);
         }
 
-        $user = User::where('email', $request['email'])->firstOrFail();
-
+        $user = User::where('email', $credentials['email'])->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Hi ' . $user->name . ', welcome!',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user
-        ], 200);
+            'user' => $user,
+        ]);
     }
 
-    public function logout()
+    /**
+     * Revoke all tokens for the authenticated user.
+     */
+    public function logout(Request $request)
     {
-        auth()->user()->tokens()->delete();
+        $request->user()->tokens()->delete();
 
         return response()->json([
-            'message' => 'You are logged out'
+            'message' => 'You are logged out',
         ]);
     }
 }

@@ -1,4 +1,4 @@
-Order.vue 
+Order.vue
   <template>
   <div>
     <Navbar />
@@ -187,7 +187,7 @@ Order.vue
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/services/api";
 import Navbar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
 export default {
@@ -219,9 +219,9 @@ export default {
       { text: "Actions", value: "actions", sortable: false },
     ],
     isLoading: false,
-    snackbar1: false, 
-    snackbar2: false, 
-    snackbar3: false, 
+    snackbar1: false,
+    snackbar2: false,
+    snackbar3: false,
     items: [],
     editedIndex: -1,
     editedItem: {
@@ -258,10 +258,15 @@ export default {
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
-    deleteItemConfirm() {
-      const index = this.items.indexOf(this.editedItem);
-      this.items.splice(index, 1);
-      this.closeDelete();
+    async deleteItemConfirm() {
+      try {
+        await api.delete(`/order/${this.editedItem.id}`);
+        this.snackbar3 = true;
+        await this.fetchData();
+        this.closeDelete();
+      } catch (error) {
+        console.error("Error deleting item:", error);
+      }
     },
 
     close() {
@@ -287,12 +292,7 @@ export default {
     //get data
     async fetchData() {
       try {
-        const headers = {
-          Authorization: `Bearer 29|LLsaDlynLAwnMMuURjsi7R59bCxdIIi3tq6no7va`,
-        };
-        const response = await axios.get("http://127.0.0.1:8081/api/order", {
-          headers,
-        });
+        const response = await api.get("/order");
         this.items = response.data.data;
         console.log(this.items);
       } catch (error) {
@@ -305,22 +305,17 @@ export default {
     //post n put data
     async save() {
       try {
-        const headers = {
-          Authorization: `Bearer 29|LLsaDlynLAwnMMuURjsi7R59bCxdIIi3tq6no7va`,
-          "Content-Type": "application/json",
-        };
 
         if (this.formTitle === "Add Order") {
           console.log("Sending POST request...");
           console.log(this.editedItem);
 
-          const response = await axios.post(
-            "http://127.0.0.1:8081/api/order",
-            this.editedItem,
-            { headers }
+          await api.post(
+            "/order",
+            this.editedItem
           );
-          axios
-            .get("http://127.0.0.1:8081/api/order", { headers })
+          api
+            .get("/order")
             .then((response) => {
               this.items = response.data.data;
               this.snackbar1 = true;
@@ -329,16 +324,14 @@ export default {
             .catch((error) => {
               console.log(error.response);
             });
-          this.editedItem = response.data;
         } else {
           console.log("Sending PUT request...");
-          await axios.put(
-            `http://127.0.0.1:8081/api/order/${this.editedItem.id}`,
-            this.editedItem,
-            { headers }
+          await api.put(
+            `/order/${this.editedItem.id}`,
+            this.editedItem
           );
-          axios
-            .get("http://127.0.0.1:8081/api/order", { headers })
+          api
+            .get("/order")
             .then((response) => {
               this.items = response.data.data;
               this.snackbar2 = true;
@@ -354,28 +347,10 @@ export default {
         console.error("Error saving data:", error.response);
       }
     },
-
-    //delete data
-    async deleteItem(item) {
-      try {
-        const headers = {
-          Authorization: "Bearer 29|LLsaDlynLAwnMMuURjsi7R59bCxdIIi3tq6no7va",
-        };
-        await axios.delete(`http://127.0.0.1:8081/api/order/${item.id}`, {
-          headers,
-        });
-        this.snackbar3 = true;
-        await this.fetchData();
-
-        this.closeDelete();
-      } catch (error) {
-        console.error("Error deleting item:", error);
-      }
-    },
   },
   mounted() {
-    this.fetchData();
     this.isLoading = true;
+    this.fetchData();
   },
 };
 </script>

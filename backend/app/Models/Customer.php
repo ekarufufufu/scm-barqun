@@ -13,13 +13,13 @@ class Customer extends Model
 
     protected $guarded = ['id'];
 
-    public function stockOut()
+    public function orders()
     {
-        return $this->belongsTo(StockOut::class);
+        return $this->hasMany(Order::class);
     }
 
-    public function order()
+    public function stockOuts()
     {
-        return $this->hasOne(Order::class);
+        return $this->hasMany(StockOut::class);
     }
 }

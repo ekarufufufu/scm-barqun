@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    function __construct()
+    public function __construct()
     {
-        $this->middleware('permission:order-list|order-create|order-edit|order-delete', ['only' => 'index', 'store']);
+        $this->middleware('permission:order-list|order-create|order-edit|order-delete', ['only' => ['index', 'show']]);
         $this->middleware('permission:order-create', ['only' => ['store']]);
         $this->middleware('permission:order-edit', ['only' => ['update']]);
         $this->middleware('permission:order-delete', ['only' => ['destroy']]);

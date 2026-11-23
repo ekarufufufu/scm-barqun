@@ -11,7 +11,7 @@
   <img :src="preview"/>
 </v-avatar>
 <label for="my-file">
-<v-btn 
+<v-btn
     @click="openFileInput"
     class="ml-n10 mt-15"
     elevation="2"
@@ -45,7 +45,7 @@
         <v-card-text>
           <v-container>
             <v-row>
-             
+
               <v-col cols="12">
                 <v-text-field
                   v-model="editedItem.name"
@@ -60,14 +60,6 @@
                   prepend-icon= "mdi-email-outline"
                 ></v-text-field>
               </v-col>
-              <v-col cols="12">
-                <v-text-field
-                  v-model="editedItem.password"
-                  label="Password"
-                  prepend-icon= "mdi-lock-outline"
-                ></v-text-field>
-              </v-col>
-              
               <v-col
                 cols="12"
                 sm="6"
@@ -97,7 +89,7 @@
     </v-dialog>
  <input type="file" accept="image/*" @change="previewImage" class="inputImage form-control-file" id="my-file">
  <v-card ref="form">
-        
+
       </v-card>
   </v-card-text>
     </v-row>
@@ -113,7 +105,7 @@ export default {
   },
    data: () => ({
      dialog: false,
-      preview: "bongo.gif",
+      preview: "/bongo.gif",
       image: null,
       preview_list: [],
       image_list: [],
@@ -121,12 +113,10 @@ export default {
       editedItem: {
         name: "",
       email: "",
-      password: "",  
     },
 
         name: localStorage.getItem("name"),
-        email: localStorage.getItem("email"),
-        password: localStorage.getItem("password")
+        email: localStorage.getItem("email")
     }),
   methods: {
      openFileInput() {

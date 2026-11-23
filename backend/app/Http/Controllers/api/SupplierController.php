@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 
 class SupplierController extends Controller
 {
-    function __construct()
+    public function __construct()
     {
-        $this->middleware('permission:supplier-list|supplier-create|supplier-edit|supplier-delete', ['only' => 'index', 'store']);
+        $this->middleware('permission:supplier-list|supplier-create|supplier-edit|supplier-delete', ['only' => ['index', 'show']]);
         $this->middleware('permission:supplier-create', ['only' => ['store']]);
         $this->middleware('permission:supplier-edit', ['only' => ['update']]);
         $this->middleware('permission:supplier-delete', ['only' => ['destroy']]);

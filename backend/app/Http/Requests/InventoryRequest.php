@@ -24,9 +24,9 @@ class InventoryRequest extends FormRequest
     public function rules()
     {
         return [
-            'nama_gudang' => 'required',
-            'lokasi_gudang' => 'required',
-            'kapasitas_stock' => 'required'
+            'nama_gudang' => ['required', 'string', 'max:255'],
+            'lokasi_gudang' => ['required', 'string', 'max:255'],
+            'kapasitas_stock' => ['required', 'integer', 'min:0'],
         ];
     }
 }

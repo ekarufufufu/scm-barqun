@@ -24,10 +24,10 @@ class ProductRequest extends FormRequest
     public function rules()
     {
         return [
-            'nama_barang' => 'required',
-            'harga' => 'required',
-            'jumlah_stock_tersedia' => 'required',
-            'deskripsi' => 'nullable'
+            'nama_barang' => ['required', 'string', 'max:255'],
+            'harga' => ['required', 'integer', 'min:0'],
+            'jumlah_stock_tersedia' => ['required', 'integer', 'min:0'],
+            'deskripsi' => ['nullable', 'string'],
         ];
     }
 }

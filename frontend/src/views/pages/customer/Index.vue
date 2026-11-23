@@ -164,7 +164,7 @@
   </div>
 </template>
 <script>
-import axios from "axios";
+import api from "@/services/api";
 import Navbar from "@/components/NavBar.vue";
 import Footer from "@/components/Footer.vue";
 export default {
@@ -219,20 +219,15 @@ export default {
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
-    deleteItemConfirm() {
-      const index = this.items.indexOf(this.editedItem);
-      this.items.splice(index, 1);
-      this.closeDelete();
-    },
-    save() {
-      if (this.formTitle === "Add Customer") {
-        this.items.push(Object.assign({}, this.editedItem));
-      } else {
-        const index = this.items.indexOf(this.editedItem);
-        this.items.splice(index, Object.assign({}, this.editedItem));
+    async deleteItemConfirm() {
+      try {
+        await api.delete(`/customer/${this.editedItem.id}`);
+        this.snackbar3 = true;
+        await this.fetchData();
+        this.closeDelete();
+      } catch (error) {
+        console.error("Error deleting item:", error);
       }
-      this.close();
-      this.snackbar = true;
     },
     close() {
       this.dialog = false;
@@ -256,63 +251,25 @@ export default {
 
     async save() {
       try {
-        const headers = {
-          Authorization: `Bearer 29|LLsaDlynLAwnMMuURjsi7R59bCxdIIi3tq6no7va`,
-          "Content-Type": "application/json",
-        };
-
-        console.log("Form Title:", this.formTitle);
-        console.log("Edited Item:", this.editedItem);
-
         if (this.formTitle === "Add Customer") {
-          console.log("Sending POST request...");
-          await axios.post(
-            "http://127.0.0.1:8081/api/customer",
-            this.snackbar1 = true,
-            this.editedItem,
-            { headers }
-          );
+          await api.post("/customer", this.editedItem);
+          this.snackbar1 = true;
         } else {
-          console.log("Sending PUT request...");
-          await axios.put(
-            `http://127.0.0.1:8081/api/customer/${this.editedItem.id}`,
-            this.snackbar2 = true,
-            this.editedItem,
-            { headers }
-          );
+          await api.put(`/customer/${this.editedItem.id}`, this.editedItem);
+          this.snackbar2 = true;
         }
 
-        console.log("Request successful!");
+        await this.fetchData();
+        this.dialog = false;
+        this.clearEditedItem();
       } catch (error) {
         console.error("Error saving data:", error);
       }
     },
 
-    async deleteItem(item) {
-      try {
-        const headers = {
-          Authorization: "Bearer 29|LLsaDlynLAwnMMuURjsi7R59bCxdIIi3tq6no7va",
-        };
-        await axios.delete(`http://127.0.0.1:8081/api/customer/${item.id}`, {
-          headers,
-        });
-        this.snackbar3 = true;
-        await this.fetchData();
-
-        this.closeDelete();
-      } catch (error) {
-        console.error("Error deleting item:", error);
-      }
-    },
-
     async fetchData() {
       try {
-        const headers = {
-          Authorization: `Bearer 29|LLsaDlynLAwnMMuURjsi7R59bCxdIIi3tq6no7va`,
-        };
-        const response = await axios.get("http://127.0.0.1:8081/api/customer", {
-          headers,
-        });
+        const response = await api.get("/customer");
         this.items = response.data.data;
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -322,8 +279,8 @@ export default {
     },
   },
   mounted() {
-    this.fetchData();
     this.isLoading = true;
+    this.fetchData();
   },
 };
 </script>

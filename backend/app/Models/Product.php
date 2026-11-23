@@ -13,18 +13,23 @@ class Product extends Model
 
     protected $guarded = ['id'];
 
-    public function stockIn()
+    public function stockIns()
     {
-        return $this->belongsTo(StockIn::class);
+        return $this->hasMany(StockIn::class);
     }
 
-    public function stockOut()
+    public function stockOuts()
     {
-        return $this->belongsTo(StockOut::class);
+        return $this->hasMany(StockOut::class);
     }
 
-    public function stockOpname()
+    public function stockOpnames()
     {
-        return $this->belongsTo(StockOpname::class);
+        return $this->hasMany(StockOpname::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }

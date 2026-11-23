@@ -8,12 +8,10 @@
 <script>
 import LeftBar from '@/components/LeftBar.vue'
 import Customers from '@/views/pages/customer/Index.vue'
-import Footer from '@/components/Footer.vue'
 export default {
     components:{
         LeftBar,
         Customers,
-        Footer,
 
     }
 }

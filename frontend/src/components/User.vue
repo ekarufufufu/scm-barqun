@@ -37,25 +37,36 @@
                 <v-card-text>
                   <v-container>
                     <v-row>
-                      <v-col cols="12" sm="6" md="4">
+                      <v-col cols="12" sm="6" md="3">
                         <v-text-field
                           v-model="editedItem.name"
                           label="User Name"
                           prepend-icon="mdi-account-outline"
                         ></v-text-field>
                       </v-col>
-                      <v-col cols="12" sm="6" md="4">
+                      <v-col cols="12" sm="6" md="3">
                         <v-text-field
                           v-model="editedItem.email"
                           label="Email"
                           prepend-icon="mdi-email-outline"
                         ></v-text-field>
                       </v-col>
-                      <v-col cols="12" sm="6" md="4">
+                      <v-col cols="12" sm="6" md="3">
+                        <v-text-field
+                          v-model="editedItem.password"
+                          label="Password"
+                          prepend-icon="mdi-lock-outline"
+                          type="password"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="3">
                         <v-select
-                          :items="status"
-                          v-model="editedItem.status"
-                          label="User Status"
+                          :items="roleItems"
+                          v-model="editedItem.roles"
+                          label="Role"
+                          prepend-icon="mdi-shield-account-outline"
+                          multiple
+                          chips
                         ></v-select>
                       </v-col>
                     </v-row>
@@ -151,7 +162,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/services/api";
 import Navbar from "../components/NavBar.vue";
 export default {
   components: {
@@ -173,10 +184,9 @@ export default {
         value: "name",
       },
       { text: "Email", value: "email" },
-      { text: "Password", value: "password" },
       { text: "Actions", value: "actions", sortable: false },
     ],
-    status: ["Active", "Nonactive"],
+    roleItems: [],
     items: [],
     isLoading: false,
     editedIndex: -1,
@@ -184,11 +194,13 @@ export default {
       name: "",
       email: "",
       password: "",
+      roles: [],
     },
     defaultItem: {
       name: "",
       email: "",
       password: "",
+      roles: [],
     },
   }),
 
@@ -202,10 +214,15 @@ export default {
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
-    deleteItemConfirm() {
-      const index = this.items.indexOf(this.editedItem);
-      this.items.splice(index, 1);
-      this.closeDelete();
+    async deleteItemConfirm() {
+      try {
+        await api.delete(`/user/${this.editedItem.id}`);
+        this.snackbar3 = true;
+        await this.fetchData();
+        this.closeDelete();
+      } catch (error) {
+        console.error("Error deleting item:", error);
+      }
     },
 
     close() {
@@ -217,22 +234,26 @@ export default {
       this.clearEditedItem();
     },
     clearEditedItem() {
-      this.editedItem = {};
+      this.editedItem = Object.assign({}, this.defaultItem);
+    },
+
+    async fetchRoles() {
+      try {
+        const response = await api.get("/role");
+        this.roleItems = (response.data.data || []).map((role) => role.name);
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      }
     },
 
     //get data
     async fetchData() {
       try {
-        const headers = {
-          Authorization: `Bearer 29|LLsaDlynLAwnMMuURjsi7R59bCxdIIi3tq6no7va`,
-        };
-        const response = await axios.get("http://127.0.0.1:8081/api/user", {
-          headers,
-        });
+        const response = await api.get("/user");
         this.items = response.data.data;
       } catch (error) {
         console.error("Error fetching data:", error);
-      }finally{
+      } finally {
         this.isLoading = false;
       }
     },
@@ -240,77 +261,35 @@ export default {
     //post n put data
     async save() {
       try {
-        const headers = {
-          Authorization: `Bearer 29|LLsaDlynLAwnMMuURjsi7R59bCxdIIi3tq6no7va`,
-          "Content-Type": "application/json",
-        };
+        const payload = Object.assign({}, this.editedItem);
 
-        if (this.formTitle === "Add User") {
-          console.log("Sending POST request...");
-          console.log(this.editedItem);
-
-          const response = await axios.post(
-            "http://127.0.0.1:8081/api/user",
-            this.editedItem,
-            { headers }
-          );
-          axios
-            .get("http://127.0.0.1:8081/api/user", { headers })
-            .then((response) => {
-              this.items = response.data.data;
-              this.snackbar1 = true;
-              this.dialog = false;
-            })
-            .catch((error) => {
-              console.log(error.response);
-            });
-
-          this.editedItem.id = response.data.id;
-        } else {
-          console.log("Sending PUT request...");
-          await axios.put(
-            `http://127.0.0.1:8081/api/user/${this.editedItem.id}`,
-            this.editedItem,
-            { headers }
-          );
-          axios
-            .get("http://127.0.0.1:8081/api/user", { headers })
-            .then((response) => {
-              this.items = response.data.data;
-              this.snackbar2 = true;
-              this.dialog = false;
-            })
-            .catch((error) => {
-              console.log(error.response);
-            });
+        if (!Array.isArray(payload.roles)) {
+          payload.roles = payload.roles ? [payload.roles] : [];
         }
 
-        console.log("Request successful!");
+        if (!payload.password) {
+          delete payload.password;
+        }
+
+        if (this.formTitle === "Add User") {
+          await api.post("/user", payload);
+          this.snackbar1 = true;
+        } else {
+          await api.put(`/user/${payload.id}`, payload);
+          this.snackbar2 = true;
+        }
+
+        await this.fetchData();
+        this.dialog = false;
+        this.clearEditedItem();
       } catch (error) {
         console.error("Error saving data:", error.response);
-      }
-    },
-
-    //delete data
-    async deleteItem(item) {
-      try {
-        const headers = {
-          Authorization: "Bearer 29|LLsaDlynLAwnMMuURjsi7R59bCxdIIi3tq6no7va",
-        };
-        await axios.delete(`http://127.0.0.1:8081/api/user/${item.id}`, {
-          headers,
-        });
-        this.snackbar3 = true;
-        await this.fetchData();
-
-        this.closeDelete();
-      } catch (error) {
-        console.error("Error deleting item:", error);
       }
     },
   },
   mounted() {
     this.fetchData();
+    this.fetchRoles();
     this.isLoading = true;
   },
 };

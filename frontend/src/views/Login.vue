@@ -46,7 +46,7 @@
                   <v-img
                     class="mt-12"
                     width="270px"
-                    src="../public/image 2.png"
+                    src="/image 2.png"
                   />
                   <br />
                   <h5 class="text-center">
@@ -68,7 +68,7 @@
                   <v-img
                     class="mt-12"
                     width="250px"
-                    src="../public/image 2.png"
+                    src="/image 2.png"
                   />
                   <br />
                   <h5 class="text-center">
@@ -163,7 +163,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/services/api";
 export default {
   data: () => ({
     step: 1,
@@ -191,61 +191,58 @@ export default {
   }),
 
   created() {
-    if (
-      localStorage.getItem("token") != "" &&
-      localStorage.getItem("token") != null
-    ) {
+    if (localStorage.getItem("token")) {
       this.$router.push("/home");
     }
   },
 
   methods: {
-     loginAction(){
-        this.isSubmitting = true
-        let payload = {
-            email: this.email,
-            password: this.password,
-        }
-        axios.post('http://127.0.0.1:8081/api/login', payload)
-          .then(response => {
-            localStorage.setItem("name", response.data.user.name);
-            localStorage.setItem("email", response.data.user.email);
-            localStorage.setItem("password", response.data.user.password);
-            localStorage.setItem('token', response.data.token)
-            this.$router.push('/home')
-            console.log(response.data)
-          })
-          .catch(error => {
-            this.isSubmitting = false
-           if (error.response.data.errors != undefined) {
-                this.validationErrors = error.response.data.errors
-            }
-            if (error.response.data.error != undefined) { 
-                this.validationErrors = error.response.data.error
-            }
-            this.snackbar3 = true;
-            return console.log(error)
-          });
-     },
-     registerAction(){
-        let payload = {
-            name:this.isi.namargstr,
-            email: this.isi.emailrgstr,
-            password: this.isi.passwordrgstr,
-        }
-        axios.post('http://127.0.0.1:8081/api/register', payload)
-          .then(response => {
-            this.snackbar1 = true;
-             this.$nextTick(() => {
-          this.isi = Object.assign({}, this.kosong)
+    loginAction() {
+      this.isSubmitting = true;
+
+      const payload = {
+        email: this.email,
+        password: this.password,
+      };
+
+      api
+        .post("/login", payload)
+        .then((response) => {
+          localStorage.setItem("token", response.data.access_token);
+          localStorage.setItem("name", response.data.user.name);
+          localStorage.setItem("email", response.data.user.email);
+          this.$router.push("/home");
         })
-            return console.log(response);
-          })
-          .catch(error => {
-            this.snackbar2 = true;
-            return console.log(error);
+        .catch((error) => {
+          this.isSubmitting = false;
+          const data = error.response && error.response.data;
+
+          if (data && data.errors) {
+            this.validationErrors = data.errors;
+          }
+
+          this.snackbar3 = true;
+        });
+    },
+    registerAction() {
+      const payload = {
+        name: this.isi.namargstr,
+        email: this.isi.emailrgstr,
+        password: this.isi.passwordrgstr,
+      };
+
+      api
+        .post("/register", payload)
+        .then(() => {
+          this.snackbar1 = true;
+          this.$nextTick(() => {
+            this.isi = Object.assign({}, this.kosong);
           });
-     }
+        })
+        .catch(() => {
+          this.snackbar2 = true;
+        });
+    },
   },
 };
 </script>
@@ -271,7 +268,7 @@ export default {
 }
 .ocean {
   height: 500px;
-  background-image: url("../public/Rectangle 2.png");
+  background-image: url("/Rectangle 2.png");
   background-size: cover;
   background-repeat: no-repeat;
   margin-top: 0px;
@@ -279,7 +276,7 @@ export default {
 }
 .ocean2 {
   height: 500px;
-  background-image: url("../public/Rectangle 2.png");
+  background-image: url("/Rectangle 2.png");
   background-size: cover;
   background-repeat: no-repeat;
   margin-top: 0px;

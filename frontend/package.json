@@ -1,55 +1,50 @@
 {
-  "name": "scm",
+  "name": "scm-barqun-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "preview": "vite preview",
     "serve": "vite preview",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src"
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
+    "lint:check": "eslint --ext .js,.vue --ignore-path .gitignore src"
   },
   "dependencies": {
-    "@babel/cli": "^7.23.0",
-    "@babel/core": "^7.23.2",
     "@fortawesome/fontawesome-free": "^6.4.2",
     "@mdi/font": "^7.3.67",
-    "axios": "^1.6.2",
+    "axios": "^1.21.1",
     "core-js": "^3.8.3",
     "v-click-outside": "^3.2.0",
-    "vue": "^2.6.14",
-    "vue-router": "^3.5.1",
-    "vuetify": "^2.6.0",
+    "vue": "^2.7.16",
+    "vue-router": "^3.6.5",
+    "vuetify": "^2.7.2",
     "vuex": "^3.6.2"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^5.0.8",
-    "@vue/cli-plugin-eslint": "~5.0.0",
-    "@vue/cli-plugin-router": "~5.0.0",
-    "@vue/cli-plugin-vuex": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
+    "@babel/core": "^7.23.2",
+    "@babel/eslint-parser": "^7.23.3",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
-    "material-design-icons-iconfont": "^6.7.0",
     "sass": "~1.32.0",
-    "sass-loader": "^10.0.0",
     "unplugin-vue-components": "^0.25.2",
-    "vite": "^4.4.11",
+    "vite": "^4.5.14",
     "vite-plugin-vue2": "^2.0.3",
-    "vue-cli-plugin-vuetify": "~2.5.8",
-    "vue-template-compiler": "^2.6.14",
-    "vuetify-loader": "^1.7.0"
+    "vue-template-compiler": "^2.7.16"
   },
   "eslintConfig": {
     "root": true,
     "env": {
-      "node": true
+      "node": true,
+      "browser": true
     },
     "extends": [
       "plugin:vue/essential",
       "eslint:recommended"
     ],
     "parserOptions": {
-      "parser": "@babel/eslint-parser"
+      "parser": "@babel/eslint-parser",
+      "requireConfigFile": false
     },
     "rules": {
       "vue/multi-word-component-names": "off"

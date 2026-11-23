@@ -50,10 +50,15 @@ class User extends Authenticatable
 
     public function getRoleAttribute()
     {
-        return $this->roles->first()->name;
+        $role = $this->roles->first();
+
+        return $role ? $role->name : null;
     }
+
     public function getAllPermissionsAttribute()
     {
-        return $this->roles->first()->permissions->pluck('name');
+        $role = $this->roles->first();
+
+        return $role ? $role->permissions->pluck('name') : collect();
     }
 }

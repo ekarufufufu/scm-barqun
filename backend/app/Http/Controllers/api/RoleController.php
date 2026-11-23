@@ -4,15 +4,13 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
-    function __construct()
+    public function __construct()
     {
-        $this->middleware('permission:role-list|role-create|role-edit|role-delete', ['only' => 'index', 'store']);
+        $this->middleware('permission:role-list|role-create|role-edit|role-delete', ['only' => ['index', 'show']]);
         $this->middleware('permission:role-create', ['only' => ['store']]);
         $this->middleware('permission:role-edit', ['only' => ['update']]);
         $this->middleware('permission:role-delete', ['only' => ['destroy']]);
@@ -46,30 +44,24 @@ class RoleController extends Controller
 
     public function show(Role $role)
     {
-        // $role = Role::find($id);
-        // $rolePermissions = Permission::join("role_has_permissions", "role_has_permissions.permission_id", "=", "permissions.id")
-        //     ->where("role_has_permissions.role_id", $id)
-        //     ->get();
-
         return response()->json([
-            'message' => 'Data Retreived',
+            'message' => 'Data Retrieved',
             'data' => array_merge(
                 $role->toArray(),
                 [
-                    'permissions' => $role->first()->permissions->pluck('name')
+                    'permissions' => $role->permissions->pluck('name'),
                 ]
             ),
-        ], 200);
+        ]);
     }
 
     public function update(Request $request, Role $role)
     {
         $this->validate($request, [
-            'name' => 'required',
-            'permission' => 'required'
+            'name' => 'required|unique:roles,name,' . $role->id,
+            'permission' => 'required',
         ]);
 
-        // $role = Role::find($id);
         $role->name = $request->input('name');
         $role->save();
 
@@ -83,13 +75,10 @@ class RoleController extends Controller
 
     public function destroy(Role $role)
     {
-        DB::table("roles")->where('id', $role->id)->delete();
+        $role->delete();
 
-        return response()->json(
-            [
-                'message' => 'Data Deleted'
-            ],
-            200
-        );
+        return response()->json([
+            'message' => 'Data Deleted',
+        ]);
     }
 }

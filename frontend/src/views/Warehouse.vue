@@ -30,7 +30,6 @@
 
 <script>
 import LeftBar from "@/components/LeftBar.vue";
-import Footer from "@/components/Footer.vue";
 import Navbar from "@/components/NavBar.vue";
 import StockIn from "@/components/warehouse/StockIn.vue"
 import StockOut from "@/components/warehouse/StockOut.vue"
@@ -38,7 +37,6 @@ import StockOpName from "@/components/warehouse/StockOpName.vue"
 export default {
   components: {
     LeftBar,
-    Footer,
     Navbar,
     StockIn,
     StockOut,
@@ -144,7 +142,7 @@ export default {
           tanggal: "130206",
         },
       ];
-      
+
     },
 
     editItem(item) {

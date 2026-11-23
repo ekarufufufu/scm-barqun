@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 
 class StockOpnameController extends Controller
 {
-    function __construct()
+    public function __construct()
     {
-        $this->middleware('permission:stockopname-list|stockopname-create|stockopname-edit|stockopname-delete', ['only' => 'index', 'store']);
+        $this->middleware('permission:stockopname-list|stockopname-create|stockopname-edit|stockopname-delete', ['only' => ['index', 'show']]);
         $this->middleware('permission:stockopname-create', ['only' => ['store']]);
         $this->middleware('permission:stockopname-edit', ['only' => ['update']]);
         $this->middleware('permission:stockopname-delete', ['only' => ['destroy']]);

@@ -15,11 +15,16 @@ class Order extends Model
 
     public function product()
     {
-        return $this->hasMany(Product::class);
+        return $this->belongsTo(Product::class);
     }
 
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function stockOuts()
+    {
+        return $this->hasMany(StockOut::class);
     }
 }

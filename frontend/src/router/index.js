@@ -89,13 +89,32 @@ const routes = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+  },
+  {
+    path: '*',
+    redirect: '/'
   }
 ]
 
 const router = new VueRouter({
   mode: 'history',
-  // base: process.env.BASE_URL,
   routes
+})
+
+const publicPages = ['/', '/about']
+
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = Boolean(localStorage.getItem('token'))
+
+  if (!publicPages.includes(to.path) && !isAuthenticated) {
+    return next('/')
+  }
+
+  if (to.path === '/' && isAuthenticated) {
+    return next('/home')
+  }
+
+  return next()
 })
 
 export default router

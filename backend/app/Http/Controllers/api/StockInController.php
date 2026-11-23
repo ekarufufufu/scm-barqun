@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 
 class StockInController extends Controller
 {
-    function __construct()
+    public function __construct()
     {
-        $this->middleware('permission:stockin-list|stockin-create|stockin-edit|stockin-delete', ['only' => 'index', 'store']);
+        $this->middleware('permission:stockin-list|stockin-create|stockin-edit|stockin-delete', ['only' => ['index', 'show']]);
         $this->middleware('permission:stockin-create', ['only' => ['store']]);
         $this->middleware('permission:stockin-edit', ['only' => ['update']]);
         $this->middleware('permission:stockin-delete', ['only' => ['destroy']]);

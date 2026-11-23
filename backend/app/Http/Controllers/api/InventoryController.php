@@ -9,9 +9,9 @@ use App\Http\Requests\InventoryRequest;
 
 class InventoryController extends Controller
 {
-    function __construct()
+    public function __construct()
     {
-        $this->middleware('permission:inventory-list|inventory-create|inventory-edit|inventory-delete', ['only' => 'index', 'store']);
+        $this->middleware('permission:inventory-list|inventory-create|inventory-edit|inventory-delete', ['only' => ['index', 'show']]);
         $this->middleware('permission:inventory-create', ['only' => ['store']]);
         $this->middleware('permission:inventory-edit', ['only' => ['update']]);
         $this->middleware('permission:inventory-delete', ['only' => ['destroy']]);

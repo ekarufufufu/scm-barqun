@@ -78,7 +78,7 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($products as $product) {
-            Product::create($product);
+            Product::firstOrCreate(['nama_barang' => $product['nama_barang']], $product);
         }
     }
 }

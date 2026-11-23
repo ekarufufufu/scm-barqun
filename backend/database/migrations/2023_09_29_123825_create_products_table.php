@@ -18,7 +18,7 @@ class CreateProductsTable extends Migration
             $table->string('nama_barang');
             $table->bigInteger('harga');
             $table->integer('jumlah_stock_tersedia');
-            $table->text('deskripsi');
+            $table->text('deskripsi')->nullable();
             $table->timestamps();
         });
     }
